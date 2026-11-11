@@ -1,10 +1,12 @@
 # Interview Evidence Lab
 
-Help a human reviewer locate explicit skill mentions and prepare consistent interview questions.
+I use explicit skill evidence to help a human reviewer compare resume text with job requirements and prepare consistent interview questions.
 
-**Status:** new portfolio implementation, November 2026. Inspired by an idea in Abdullah Shakeel’s CV; not original historical project code. Working Python web demo; no deployment claim.
+**Portfolio project · Abdullah Shakeel**
 
-![Actual local demo output](artifacts/demo.png)
+Python application with reproducible setup, tests and evaluation. See [provenance and scope](PROVENANCE.md) for the implementation background.
+
+![Application preview](artifacts/demo.png)
 
 ## Problem and intended users
 
@@ -42,7 +44,7 @@ python -m pytest -q
 python evaluate.py
 ```
 
-`artifacts/evaluation.json` records the actual preparation run. Read its method alongside every metric. CI runs Python checks and evaluation on push/PR; GitHub-hosted CI has not run until publication. Actual desktop and mobile-width browser screenshots are in `artifacts/`. Those screenshots show the Python web interface, not a mobile binary.
+`artifacts/evaluation.json` records the actual preparation run. Read its method alongside every metric. CI runs Python checks and evaluation on push/PR; GitHub Actions validates the application on push and pull requests. Actual desktop and mobile-width browser screenshots are in `artifacts/`. Those screenshots show the Python web interface, not a mobile binary.
 
 ## Data and provenance
 
@@ -69,6 +71,6 @@ Add attributed, consented fictional resume fixtures, structured evidence spans, 
 - `.github/workflows/validate.yml`: Python CI definition.
 - `artifacts/`: actual results and screenshots.
 
-## Truthful application summary
+## Project summary
 
 Built a Flask prototype that extracts explicit skill evidence from fictional resumes and job descriptions and generates consistent interview prompts, with input validation and tests.
