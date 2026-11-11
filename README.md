@@ -1,76 +1,67 @@
-# Interview Evidence Lab
+# Resume skill evidence for human review
 
-I use explicit skill evidence to help a human reviewer compare resume text with job requirements and prepare consistent interview questions.
+A small Flask application that locates explicit skill terms in resume text and job requirements, then creates a consistent set of interview prompts. The output is evidence for a reviewer to inspect, rather than a candidate score.
 
-**Portfolio project · Abdullah Shakeel**
+**Python · Flask · Regular expressions · Input validation**
 
-Python application with reproducible setup, tests and evaluation. See [provenance and scope](PROVENANCE.md) for the implementation background.
+[Matching logic](core.py) · [Boundary and rendering tests](test_app.py) · [Evaluation cases](evaluate.py)
 
-![Application preview](artifacts/demo.png)
+## Try it in one minute
 
-## Problem and intended users
-
-Recruiters and applicants reviewing fictional text samples.
-
-## Features and architecture
-
-Case-insensitive skill extraction with word boundaries; explicit matched and missing terms; reproducible interview prompts; escaped HTML; document length limits.
-
-```text
-Flask form → input validation → boundary-aware skill extraction → set comparison → JSON evidence and question prompts.
-```
-
-Python and Flask keep the implementation inspectable and local. The tiny explicit vocabulary makes its behavior auditable; a generative model is unnecessary for this task.
-
-## Run locally
-
-Requires Python 3.12. From this repository directory:
+Python 3.12, from the repository root:
 
 ```bash
 python -m venv .venv
 # Windows PowerShell: .venv\Scripts\Activate.ps1
 . .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 python app.py
 ```
 
-Open http://127.0.0.1:5001 and submit the included fictional example. No credentials or external services are required. `.env.example` documents configuration, but Flask entry points use the documented fixed ports and do not load a .env file. Development servers bind to localhost. They are not production deployments.
+Open http://127.0.0.1:5001. Submit the prefilled fictional sample; no account, API key or external model is required.
 
-## Validate and reproduce evaluation
+For resume text `Python and SQL` and job text `SQL Docker`, the result contains:
+
+```json
+{
+  "evidence_terms": ["sql"],
+  "terms_to_review": ["docker"]
+}
+```
+
+The full response also contains interview prompts. `Docker` being absent from the text does not establish that the person lacks the skill.
+
+![Skill evidence and interview prompts](artifacts/demo.png)
+
+## Why deterministic matching?
+
+The supported vocabulary is deliberately explicit: Python, SQL, Flask, React, Docker, Pandas, TensorFlow and Excel. Case-insensitive word boundaries prevent matches such as `Python` inside `pythonic` and `SQL` inside `NoSQL`.
+
+For this narrow task, a regular-expression matcher is easy to inspect, requires no third-party inference service and returns repeatable outputs. It also has clear limits: it cannot distinguish genuine experience from copied or negated text. “I do not know Python” still contains the term. A human must review the original context.
+
+## Validation and behavior
 
 ```bash
-pip install -r requirements-dev.txt
 python -m pytest -q
 python evaluate.py
 ```
 
-`artifacts/evaluation.json` records the actual preparation run. Read its method alongside every metric. CI runs Python checks and evaluation on push/PR; GitHub Actions validates the application on push and pull requests. Actual desktop and mobile-width browser screenshots are in `artifacts/`. Those screenshots show the Python web interface, not a mobile binary.
+The five tests cover word boundaries, expected evidence sets, a basic name/age substitution check, empty input and escaped script input. The evaluation reports three authored exact-match cases. These are functional checks; neither establishes hiring validity or fairness across populations.
 
-## Data and provenance
+Each document is limited to 20,000 characters. Empty input and job descriptions without supported terms produce actionable errors. Flask/Jinja escapes user text in the HTML output.
 
-All example text and evaluation cases are authored for this implementation; no applicant records are included.
+## Architecture
 
-See [PROVENANCE.md](PROVENANCE.md) and [LICENSE-REVIEW.md](LICENSE-REVIEW.md). Newly authored source and fixtures use MIT; dependencies retain their own licenses. No CV numerical achievement is represented as a measured result.
+`app.py` handles form input and rendering; `core.py` extracts terms and compares sets. The application does not store form contents or call an external model. Local request metadata can appear in development-server logs. Use fictional or appropriately consented text; the example dataset contains no real applicants.
 
-## Limitations and responsible use
+## Scope and responsible use
 
-This is not a trained job-fit predictor, PDF resume parser or candidate ranking system. A mention may be negated, copied or unsupported by experience. Missing vocabulary and alternate spellings cause omissions. No personality, video emotion or protected-trait inference is performed. Do not use this system to automate hiring.
+There is no PDF parsing, job-fit prediction, candidate ranking, personality inference or emotion detection. The interface supports a human-led interview workflow. No protected-trait field is used, but that alone does not prove the workflow is fair. An operational system would need privacy controls, consent, accessibility review and a validated review process.
 
-Inputs are processed in memory; application code does not persist form contents. Standard web-server request metadata may still appear in local logs. Use fictional examples, never confidential employer, applicant, patient or billing information. No authentication or production abuse protection is included; keep this demo local.
+The server is local development software; authentication, abuse controls and production hosting are not included. Docker is an unvalidated recipe.
 
-## Future improvements
+## Next useful improvement
 
-Add attributed, consented fictional resume fixtures, structured evidence spans, PDF text extraction with resource limits, synonym handling and accessibility-reviewed human workflows. Validate across resume formats and languages before broader use.
+Add evidence spans so the reviewer can see the sentence containing each term, then test negation and ambiguous mentions explicitly. Improve synonyms only with documented fixtures; avoid silently converting term coverage into an applicant score.
 
-## Repository guide
-
-- `core.py`: data/model or matching logic.
-- `app.py`, `templates/`: local web interface.
-- `evaluate.py`: reproducible evaluation and method.
-- `test_app.py`: functional and boundary validation.
-- `.github/workflows/validate.yml`: Python CI definition.
-- `artifacts/`: actual results and screenshots.
-
-## Project summary
-
-Built a Flask prototype that extracts explicit skill evidence from fictional resumes and job descriptions and generates consistent interview prompts, with input validation and tests.
+Source code and authored examples are MIT. [Project provenance](PROVENANCE.md) distinguishes this portfolio implementation from the earlier CV project idea; [license notes](LICENSE-REVIEW.md) cover dependencies.
